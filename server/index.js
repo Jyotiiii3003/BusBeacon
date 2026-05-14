@@ -21,7 +21,9 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 
 const PORT = process.env.PORT || 5174;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+const GEMINI_IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || "gemini-2.5-flash-image";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const GEMINI_IMAGE_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_IMAGE_MODEL}:generateContent`;
 
 app.use(express.json({ limit: "8mb" }));
 app.use(express.urlencoded({ extended: true, limit: "8mb" }));
@@ -102,7 +104,8 @@ function buildScenes(text) {
       visual: sceneKeywords.length ? sceneKeywords : keyTerms.slice(index, index + 4).map((item) => item.word),
       duration: Math.max(7, Math.min(15, Math.ceil(sentence.split(/\s+/).length / 2.6))),
       color: palette[index % palette.length],
-      icon: icons[index % icons.length]
+      icon: icons[index % icons.length],
+      visualPrompt: `A pastel educational illustration about ${sceneKeywords.join(", ") || sentence}. Clean modern learning-video style, no text labels.`
     };
   });
   if (scenes.length === 0) {
@@ -114,7 +117,8 @@ function buildScenes(text) {
       visual: ["source", "lesson", "ideas"],
       duration: 9,
       color: "#EFD8F7",
-      icon: "Sparkles"
+      icon: "Sparkles",
+      visualPrompt: "A pastel educational illustration of organized study notes becoming a clear lesson video, no text labels."
     });
   }
   return scenes;
@@ -207,7 +211,12 @@ function normalizeAiLesson(aiLesson, fallback, text) {
           visual: Array.isArray(scene.visual) && scene.visual.length ? scene.visual.map((item) => cleanText(String(item)).slice(0, 24)).filter(Boolean).slice(0, 4) : fallback.scenes[index]?.visual || [],
           duration: Number.isFinite(Number(scene.duration)) ? Math.max(7, Math.min(18, Number(scene.duration))) : fallback.scenes[index]?.duration || 9,
           color: palette[index % palette.length],
-          icon: icons.includes(scene.icon) ? scene.icon : icons[index % icons.length]
+          icon: icons.includes(scene.icon) ? scene.icon : icons[index % icons.length],
+          imageUrl: cleanText(scene.imageUrl || ""),
+          visualPrompt: cleanText(
+            scene.visualPrompt ||
+              `A pastel educational illustration for this lesson scene: ${scene.title || scene.narration || fallback.scenes[index]?.narration || ""}. Clean modern learning-video style, no text labels.`
+          )
         }))
       : fallback.scenes,
     quiz: quiz.length
@@ -387,9 +396,63 @@ app.get("/api/ai-status", async (req, res) => {
   res.json({
     provider: GEMINI_API_KEY ? "Gemini" : "Local algorithm",
     model: GEMINI_MODEL,
+    imageModel: GEMINI_IMAGE_MODEL,
     available: Boolean(GEMINI_API_KEY),
     configured: Boolean(GEMINI_API_KEY)
   });
+});
+
+app.post("/api/generate-visual", async (req, res) => {
+  if (!GEMINI_API_KEY) {
+    return res.status(400).json({ error: "Add GEMINI_API_KEY to enable Gemini visual generation." });
+  }
+
+  const scene = req.body?.scene ?? {};
+  const prompt = cleanText(
+    scene.visualPrompt ||
+      `Create a pastel educational illustration for this learning video scene: ${scene.title || ""}. Narration: ${scene.narration || ""}. Use a clean, modern, friendly explainer-video style. Do not include readable text, captions, watermarks, UI, or logos.`
+  ).slice(0, 900);
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60000);
+
+  try {
+    const response = await fetch(GEMINI_IMAGE_API_URL, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-goog-api-key": GEMINI_API_KEY
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: prompt }]
+          }
+        ],
+        generationConfig: {
+          responseModalities: ["TEXT", "IMAGE"]
+        }
+      }),
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      const detail = response.status === 429 ? "Gemini image quota or free-tier access is currently unavailable for this key." : `Gemini image generation responded with ${response.status}`;
+      throw new Error(detail);
+    }
+    const data = await response.json();
+    const imagePart = data.candidates?.[0]?.content?.parts?.find((part) => part.inlineData?.data);
+    if (!imagePart) throw new Error("Gemini did not return an image. Try a more visual scene prompt.");
+
+    res.json({
+      imageUrl: `data:${imagePart.inlineData.mimeType || "image/png"};base64,${imagePart.inlineData.data}`,
+      model: GEMINI_IMAGE_MODEL
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message || "Visual generation failed." });
+  } finally {
+    clearTimeout(timeout);
+  }
 });
 
 app.listen(PORT, () => {

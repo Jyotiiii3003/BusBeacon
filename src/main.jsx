@@ -9,6 +9,7 @@ import {
   Clock3,
   FileText,
   Globe2,
+  Image as ImageIcon,
   Lightbulb,
   Loader2,
   Network,
@@ -79,7 +80,7 @@ function App() {
             <BadgeCheck size={18} />
             <div>
               <strong>{aiStatus?.available ? "Gemini AI agent active" : "Local fallback ready"}</strong>
-              <span>{aiStatus?.available ? aiStatus.model : "Add GEMINI_API_KEY to enable cloud AI generation"}</span>
+              <span>{aiStatus?.available ? `${aiStatus.model} + ${aiStatus.imageModel}` : "Add GEMINI_API_KEY to enable cloud AI generation"}</span>
             </div>
           </div>
 
@@ -177,6 +178,12 @@ function WelcomePanel() {
 }
 
 function Studio({ result }) {
+  const [scenes, setScenes] = useState(result.scenes);
+
+  useEffect(() => {
+    setScenes(result.scenes);
+  }, [result]);
+
   return (
     <div className="studio">
       <header className="result-header">
@@ -190,7 +197,7 @@ function Studio({ result }) {
           <span><FileText size={17} /> {result.sourceStats.words} words</span>
         </div>
       </header>
-      <VideoExperience scenes={result.scenes} />
+      <VideoExperience scenes={scenes} onScenesChange={setScenes} />
       <div className="lower-grid">
         <Quiz quiz={result.quiz} />
         <MindMap map={result.mindMap} />
@@ -199,12 +206,14 @@ function Studio({ result }) {
   );
 }
 
-function VideoExperience({ scenes }) {
+function VideoExperience({ scenes, onScenesChange }) {
   const [sceneIndex, setSceneIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [captions, setCaptions] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [elapsed, setElapsed] = useState(0);
+  const [visualLoading, setVisualLoading] = useState(false);
+  const [visualError, setVisualError] = useState("");
   const timerRef = useRef(null);
   const scene = scenes[sceneIndex];
   const Icon = iconMap[scene.icon] ?? Sparkles;
@@ -252,6 +261,44 @@ function VideoExperience({ scenes }) {
     }
   }
 
+  function updateScene(field, value) {
+    onScenesChange(
+      scenes.map((item, index) => {
+        if (index !== sceneIndex) return item;
+        if (field === "visual") {
+          return {
+            ...item,
+            visual: value
+              .split(",")
+              .map((word) => word.trim())
+              .filter(Boolean)
+              .slice(0, 4)
+          };
+        }
+        return { ...item, [field]: value };
+      })
+    );
+  }
+
+  async function generateVisual() {
+    setVisualLoading(true);
+    setVisualError("");
+    try {
+      const response = await fetch("/api/generate-visual", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ scene })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Visual generation failed.");
+      onScenesChange(scenes.map((item, index) => (index === sceneIndex ? { ...item, imageUrl: data.imageUrl } : item)));
+    } catch (error) {
+      setVisualError(error.message);
+    } finally {
+      setVisualLoading(false);
+    }
+  }
+
   return (
     <section className="video-shell">
       <div className="stage" style={{ background: `linear-gradient(135deg, ${scene.color}, #fffaf5)` }}>
@@ -260,10 +307,16 @@ function VideoExperience({ scenes }) {
           <span>{Math.round(absoluteTime)}s / {totalDuration}s</span>
         </div>
         <div className="visual-cluster">
-          <div className="icon-bubble"><Icon size={54} /></div>
-          {scene.visual.map((word, index) => (
-            <span className={`keyword k${index}`} key={`${word}-${index}`}>{word}</span>
-          ))}
+          {scene.imageUrl ? (
+            <img className="scene-image" src={scene.imageUrl} alt="" />
+          ) : (
+            <>
+              <div className="icon-bubble"><Icon size={54} /></div>
+              {scene.visual.map((word, index) => (
+                <span className={`keyword k${index}`} key={`${word}-${index}`}>{word}</span>
+              ))}
+            </>
+          )}
         </div>
         <h2>{scene.title}</h2>
         {captions && <p className="caption">{scene.caption}</p>}
@@ -277,6 +330,41 @@ function VideoExperience({ scenes }) {
         <button onClick={() => setSceneIndex(Math.min(scenes.length - 1, sceneIndex + 1))}><ChevronRight size={20} /></button>
         <label className="toggle"><input type="checkbox" checked={captions} onChange={(event) => setCaptions(event.target.checked)} /> Captions</label>
         <label className="speed"><Volume2 size={17} /> <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))}><option value={0.75}>0.75x</option><option value={1}>1x</option><option value={1.25}>1.25x</option><option value={1.5}>1.5x</option><option value={2}>2x</option></select></label>
+      </div>
+      <div className="scene-editor">
+        <div className="editor-header">
+          <div>
+            <p className="eyebrow">Scene editor</p>
+            <h3>Edit before exporting or presenting</h3>
+          </div>
+          <button className="visual-button" onClick={generateVisual} disabled={visualLoading}>
+            {visualLoading ? <Loader2 className="spin" size={18} /> : <ImageIcon size={18} />}
+            Generate visual
+          </button>
+        </div>
+        {visualError && <p className="error">{visualError}</p>}
+        <div className="editor-grid">
+          <label>
+            Title
+            <input value={scene.title} onChange={(event) => updateScene("title", event.target.value)} />
+          </label>
+          <label>
+            Keywords
+            <input value={scene.visual.join(", ")} onChange={(event) => updateScene("visual", event.target.value)} />
+          </label>
+          <label className="wide">
+            Narration
+            <textarea value={scene.narration} onChange={(event) => updateScene("narration", event.target.value)} />
+          </label>
+          <label className="wide">
+            Caption
+            <textarea value={scene.caption} onChange={(event) => updateScene("caption", event.target.value)} />
+          </label>
+          <label className="wide">
+            Visual prompt
+            <textarea value={scene.visualPrompt || ""} onChange={(event) => updateScene("visualPrompt", event.target.value)} />
+          </label>
+        </div>
       </div>
     </section>
   );

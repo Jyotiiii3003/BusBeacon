@@ -9,6 +9,8 @@ intelliNote is an AI learning studio that turns source material into an interact
 - Analyze website URLs
 - Analyze YouTube links when a public English transcript is available
 - Generate interactive explanatory video scenes
+- Edit generated scene titles, narration, captions, keywords, and visual prompts
+- Generate AI visuals for individual scenes
 - Play generated narration with browser speech synthesis
 - Toggle captions on and off
 - Change playback speed
@@ -29,7 +31,7 @@ intelliNote is an AI learning studio that turns source material into an interact
 - Multer
 - pdf-parse
 - Lucide React icons
-- Gemini API, optional
+- Gemini API for text and optional image generation
 
 ## How It Works
 
@@ -40,6 +42,7 @@ The backend extracts text from the selected source, then tries to use Gemini as 
 - captions
 - quiz questions
 - mind-map branches
+- optional scene visuals
 
 If Gemini is not configured or an API call fails, intelliNote automatically falls back to a local NLP-style algorithm that can:
 
@@ -65,6 +68,7 @@ Create a `.env` file:
 ```text
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_IMAGE_MODEL=gemini-2.5-flash-image
 ```
 
 Then run intelliNote:
@@ -80,6 +84,8 @@ You can use a different Gemini model by changing:
 ```text
 GEMINI_MODEL=gemini-2.5-flash
 ```
+
+For generated scene visuals, intelliNote uses `gemini-2.5-flash-image` by default. It uses the same Google AI Studio API key as the text agent. Image availability and free-tier limits can vary by region and Google account tier.
 
 ## Getting Started
 
