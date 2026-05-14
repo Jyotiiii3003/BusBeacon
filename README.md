@@ -15,8 +15,8 @@ intelliNote is an AI learning studio that turns source material into an interact
 - Skip backward or forward by 10 seconds
 - Generate quizzes with answers and explanations
 - Generate a concept mind map
-- Optional free local AI generation with Ollama
-- Automatic fallback when Ollama is not running
+- Optional Gemini AI generation through a backend API key
+- Automatic fallback when Gemini is not configured
 - Pastel, responsive React interface
 - No login required
 
@@ -29,11 +29,11 @@ intelliNote is an AI learning studio that turns source material into an interact
 - Multer
 - pdf-parse
 - Lucide React icons
-- Ollama, optional
+- Gemini API, optional
 
 ## How It Works
 
-The backend extracts text from the selected source, then tries to use a local Ollama model as a free AI lesson agent. When Ollama is available, it generates structured JSON for:
+The backend extracts text from the selected source, then tries to use Gemini as the AI lesson agent. When `GEMINI_API_KEY` is configured on the backend, Gemini generates structured JSON for:
 
 - video scenes
 - narration
@@ -41,7 +41,7 @@ The backend extracts text from the selected source, then tries to use a local Ol
 - quiz questions
 - mind-map branches
 
-If Ollama is not running, intelliNote automatically falls back to a local NLP-style algorithm that can:
+If Gemini is not configured or an API call fails, intelliNote automatically falls back to a local NLP-style algorithm that can:
 
 - clean and segment the text
 - identify important keywords
@@ -50,33 +50,35 @@ If Ollama is not running, intelliNote automatically falls back to a local NLP-st
 - create quiz questions
 - build mind-map branches
 
-The app does not require a paid API key. It also does not yet export a rendered MP4 video; the current video experience is an interactive browser lesson with speech synthesis, captions, scene controls, and generated visuals.
+The app can run without an API key by using the local fallback. For stronger AI generation in deployment, add a Gemini API key to the backend environment. It does not yet export a rendered MP4 video; the current video experience is an interactive browser lesson with speech synthesis, captions, scene controls, and generated visuals.
 
-## Free AI Setup With Ollama
+## Gemini AI Setup
 
-Install Ollama from:
+Create a Gemini API key in Google AI Studio:
 
 ```text
-https://ollama.com
+https://aistudio.google.com/app/apikey
 ```
 
-Pull the default model:
+Create a `.env` file:
 
-```bash
-ollama pull llama3.2
+```text
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.5-flash-lite
 ```
 
-Start Ollama, then run intelliNote:
+Then run intelliNote:
 
 ```bash
 npm run dev
 ```
 
-You can choose a different installed model by creating a `.env` file:
+For deployed apps, set the same environment variables in your hosting provider's backend settings. Never put the Gemini API key in frontend React code.
 
-```bash
-OLLAMA_MODEL=llama3.1
-OLLAMA_BASE_URL=http://127.0.0.1:11434
+You can use a different Gemini model by changing:
+
+```text
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
 ## Getting Started

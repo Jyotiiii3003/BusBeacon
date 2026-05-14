@@ -19,8 +19,9 @@ loadLocalEnv();
 const app = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 const PORT = process.env.PORT || 5174;
-const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434";
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "llama3.2";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 app.use(express.json({ limit: "8mb" }));
 app.use(express.urlencoded({ extended: true, limit: "8mb" }));
@@ -195,7 +196,7 @@ function normalizeAiLesson(aiLesson, fallback, text) {
   return {
     ...fallback,
     title: title || fallback.title,
-    aiProvider: `Ollama ${OLLAMA_MODEL}`,
+    aiProvider: `Gemini ${GEMINI_MODEL}`,
     summary: Array.isArray(aiLesson.summary) && aiLesson.summary.length ? aiLesson.summary.map((item) => cleanText(String(item))).filter(Boolean).slice(0, 7) : fallback.summary,
     scenes: scenes.length
       ? scenes.slice(0, 7).map((scene, index) => ({
@@ -238,7 +239,9 @@ function normalizeAiLesson(aiLesson, fallback, text) {
   };
 }
 
-async function generateWithOllama(text, fallback) {
+async function generateWithGemini(text, fallback) {
+  if (!GEMINI_API_KEY) return fallback;
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 45000);
   const source = text.slice(0, 12000);
@@ -280,26 +283,30 @@ Source text:
 ${source}`;
 
   try {
-    const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${encodeURIComponent(GEMINI_API_KEY)}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        model: OLLAMA_MODEL,
-        prompt,
-        stream: false,
-        format: "json",
-        options: {
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
           temperature: 0.35,
-          num_predict: 2800
+          maxOutputTokens: 2800
         }
       }),
       signal: controller.signal
     });
-    if (!response.ok) throw new Error(`Ollama responded with ${response.status}`);
+    if (!response.ok) throw new Error(`Gemini responded with ${response.status}`);
     const data = await response.json();
-    return normalizeAiLesson(extractJson(data.response || ""), fallback, text);
+    const content = data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("\n") || "";
+    return normalizeAiLesson(extractJson(content), fallback, text);
   } catch (error) {
-    console.warn(`Ollama unavailable, using local algorithm: ${error.message}`);
+    console.warn(`Gemini unavailable, using local algorithm: ${error.message}`);
     return fallback;
   } finally {
     clearTimeout(timeout);
@@ -369,7 +376,7 @@ app.post("/api/analyze", upload.single("file"), async (req, res) => {
     }
 
     const fallback = buildAlgorithmLesson(text);
-    const lesson = await generateWithOllama(text, fallback);
+    const lesson = await generateWithGemini(text, fallback);
     res.json(lesson);
   } catch (error) {
     res.status(500).json({ error: error.message || "Analysis failed." });
@@ -377,29 +384,12 @@ app.post("/api/analyze", upload.single("file"), async (req, res) => {
 });
 
 app.get("/api/ai-status", async (req, res) => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 3000);
-  try {
-    const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`, { signal: controller.signal });
-    if (!response.ok) throw new Error(`Ollama responded with ${response.status}`);
-    const data = await response.json();
-    const models = Array.isArray(data.models) ? data.models.map((model) => model.name) : [];
-    res.json({
-      provider: "Ollama",
-      model: OLLAMA_MODEL,
-      available: models.some((model) => model === OLLAMA_MODEL || model.startsWith(`${OLLAMA_MODEL}:`)),
-      installedModels: models
-    });
-  } catch {
-    res.json({
-      provider: "Local algorithm",
-      model: OLLAMA_MODEL,
-      available: false,
-      installedModels: []
-    });
-  } finally {
-    clearTimeout(timeout);
-  }
+  res.json({
+    provider: GEMINI_API_KEY ? "Gemini" : "Local algorithm",
+    model: GEMINI_MODEL,
+    available: Boolean(GEMINI_API_KEY),
+    configured: Boolean(GEMINI_API_KEY)
+  });
 });
 
 app.listen(PORT, () => {

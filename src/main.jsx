@@ -78,8 +78,8 @@ function App() {
           <div className={`ai-status ${aiStatus?.available ? "online" : ""}`}>
             <BadgeCheck size={18} />
             <div>
-              <strong>{aiStatus?.available ? "Ollama AI agent active" : "Local fallback ready"}</strong>
-              <span>{aiStatus?.available ? aiStatus.model : "Start Ollama to enable free LLM generation"}</span>
+              <strong>{aiStatus?.available ? "Gemini AI agent active" : "Local fallback ready"}</strong>
+              <span>{aiStatus?.available ? aiStatus.model : "Add GEMINI_API_KEY to enable cloud AI generation"}</span>
             </div>
           </div>
 
