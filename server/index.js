@@ -405,7 +405,17 @@ async function extractFromUrl(url) {
 }
 
 async function getYouTubeTranscript(url) {
-  const id = new URL(url).searchParams.get("v") ?? url.match(/youtu\.be\/([^?]+)/)?.[1];
+  let id = "";
+
+if (url.includes("youtube.com")) {
+  id = new URL(url).searchParams.get("v");
+} else if (url.includes("youtu.be")) {
+  id = url.split("youtu.be/")[1]?.split("?")[0];
+}
+
+if (!id) {
+  throw new Error("Invalid YouTube URL");
+}
   if (!id) throw new Error("Could not identify the YouTube video id.");
   const transcriptUrl = `https://video.google.com/timedtext?lang=en&v=${id}`;
   const response = await fetch(transcriptUrl);
@@ -418,7 +428,9 @@ async function getYouTubeTranscript(url) {
     .replace(/&#39;/g, "'")
     .replace(/&quot;/g, '"');
   if (cleanText(transcript).length < 80) {
-    throw new Error("No public English transcript was found. Paste the transcript text to analyze this video.");
+    throw new Error(
+  "This YouTube video does not expose public captions. Paste transcript manually or try another video."
+);
   }
   return cleanText(transcript);
 }
