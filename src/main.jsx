@@ -248,6 +248,7 @@ function Studio({ result }) {
         {saveMessage}
         </div>
         )}
+      
       <header className="result-header">
         <div>
           <p className="eyebrow">Generated lesson</p>
@@ -267,6 +268,8 @@ function Studio({ result }) {
           onScenesChange={setScenes}
         />
       )}
+
+        
 
       {activeTab === "quiz" && (
         <div className="lower-grid">

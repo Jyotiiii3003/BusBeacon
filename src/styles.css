@@ -814,25 +814,30 @@ input {
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
 }
 
+.lesson-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  margin-bottom: 10px;
+}
+
 .save-btn {
   border: none;
-  background: linear-gradient(135deg, #6d5dfc, #8b7bff);
-  color: white;
-  padding: 12px 22px;
-  border-radius: 16px;
-  font-size: 15px;
+  background: #efe7f7;
+  color: #372a54;
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 10px 24px rgba(109, 93, 252, 0.25);
-  margin-bottom: 18px;
+  transition: all 0.2s ease;
 }
 
 .save-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(109, 93, 252, 0.35);
+  background: #e4d8f5;
+  transform: translateY(-1px);
 }
-
 .save-message {
   margin-top: 10px;
   background: #e8fff1;
