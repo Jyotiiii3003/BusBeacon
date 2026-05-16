@@ -180,6 +180,7 @@ function WelcomePanel() {
 
 function Studio({ result }) {
   const [scenes, setScenes] = useState(result.scenes);
+  const [activeTab, setActiveTab] = useState("video");
 
   useEffect(() => {
     setScenes(result.scenes);
@@ -187,26 +188,65 @@ function Studio({ result }) {
 
   return (
     <div className="studio">
+
+      <div className="studio-tabs">
+        <button
+          className={activeTab === "video" ? "active" : ""}
+          onClick={() => setActiveTab("video")}
+        >
+          🎥 Video
+        </button>
+
+        <button
+          className={activeTab === "quiz" ? "active" : ""}
+          onClick={() => setActiveTab("quiz")}
+        >
+          🧠 Quiz
+        </button>
+
+        <button
+          className={activeTab === "mindmap" ? "active" : ""}
+          onClick={() => setActiveTab("mindmap")}
+        >
+          🕸 Mind Map
+        </button>
+      </div>
+
       <header className="result-header">
         <div>
           <p className="eyebrow">Generated lesson</p>
           <h1>{result.title}</h1>
         </div>
+
         <div className="stats">
           <span><Brain size={17} /> {result.aiProvider || "AI lesson engine"}</span>
           <span><Clock3 size={17} /> {result.sourceStats.readingMinutes} min read</span>
           <span><FileText size={17} /> {result.sourceStats.words} words</span>
         </div>
       </header>
-      <VideoExperience scenes={scenes} onScenesChange={setScenes} />
-      <div className="lower-grid">
-        <Quiz quiz={result.quiz} />
-        <MindMap map={result.mindMap} />
-      </div>
+
+      {activeTab === "video" && (
+        <VideoExperience
+          scenes={scenes}
+          onScenesChange={setScenes}
+        />
+      )}
+
+      {activeTab === "quiz" && (
+        <div className="lower-grid">
+          <Quiz quiz={result.quiz} />
+        </div>
+      )}
+
+      {activeTab === "mindmap" && (
+        <div className="lower-grid">
+          <MindMap map={result.mindMap} />
+        </div>
+      )}
+
     </div>
   );
 }
-
 function VideoExperience({ scenes, onScenesChange }) {
   const [sceneIndex, setSceneIndex] = useState(0);
   const [playing, setPlaying] = useState(false);

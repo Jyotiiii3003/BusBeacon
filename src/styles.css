@@ -778,3 +778,29 @@ input {
     width: 132px;
   }
 }
+
+.studio-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.studio-tabs button {
+  border: none;
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: #f3edf8;
+  color: #3f3650;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.studio-tabs button:hover {
+  transform: translateY(-2px);
+}
+
+.studio-tabs button.active {
+  background: #524474;
+  color: white;
+}
