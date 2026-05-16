@@ -2,6 +2,64 @@ import express from "express";
 import multer from "multer";
 import pdfParse from "pdf-parse";
 import { existsSync, readFileSync } from "node:fs";
+import mongoose from "mongoose";
+
+const lessonSchema = new mongoose.Schema({
+  title: String,
+  aiProvider: String,
+
+  sourceStats: {
+    words: Number,
+    characters: Number,
+    readingMinutes: Number
+  },
+
+  summary: [String],
+
+  scenes: [
+    {
+      id: Number,
+      title: String,
+      narration: String,
+      caption: String,
+      visual: [String],
+      duration: Number,
+      color: String,
+      icon: String,
+      imageUrl: String,
+      visualPrompt: String
+    }
+  ],
+
+  quiz: [
+    {
+      id: Number,
+      question: String,
+      options: [String],
+      answer: String,
+      explanation: String
+    }
+  ],
+
+  mindMap: {
+    central: String,
+    branches: [
+      {
+        id: String,
+        label: String,
+        strength: Number,
+        children: [String]
+      }
+    ]
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const Lesson = mongoose.model("Lesson", lessonSchema);
 
 function loadLocalEnv() {
   if (!existsSync(".env")) return;
@@ -15,6 +73,10 @@ function loadLocalEnv() {
 }
 
 loadLocalEnv();
+
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("MongoDB Error:", err));
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
@@ -438,4 +500,28 @@ app.post("/api/generate-visual", async (req, res) => {
 });
 app.listen(PORT, () => {
   console.log(`intelliNote backend running on http://127.0.0.1:${PORT}`);
+});
+
+app.post("/api/save-lesson", async (req, res) => {
+  try {
+    console.log("Saving lesson...");
+
+    const lesson = new Lesson(req.body);
+
+    await lesson.save();
+
+    console.log("Lesson saved!");
+
+    res.json({
+      success: true,
+      lesson
+    });
+
+  } catch (error) {
+    console.error("SAVE ERROR:", error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
 });

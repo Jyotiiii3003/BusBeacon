@@ -182,13 +182,36 @@ function Studio({ result }) {
   const [scenes, setScenes] = useState(result.scenes);
   const [activeTab, setActiveTab] = useState("video");
 
+  async function saveLesson() {
+  try {
+    const response = await fetch("/api/save-lesson", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(result)
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      alert("Lesson saved!");
+    }
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
   useEffect(() => {
     setScenes(result.scenes);
   }, [result]);
 
   return (
+    
     <div className="studio">
-
+      
+      
       <div className="studio-tabs">
         <button
           className={activeTab === "video" ? "active" : ""}
@@ -211,6 +234,10 @@ function Studio({ result }) {
           🕸 Mind Map
         </button>
       </div>
+
+      <button onClick={saveLesson}>
+           Save Lesson
+      </button>
 
       <header className="result-header">
         <div>
