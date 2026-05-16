@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   BadgeCheck,
+  BookOpen,
   Brain,
   CheckCircle2,
   ChevronLeft,
