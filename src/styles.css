@@ -770,6 +770,59 @@ input {
   .branch {
     width: 132px;
   }
+
+  .result-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.stats {
+  justify-content: flex-start;
+}
+
+  .action-buttons {
+  width: 100%;
+  flex-direction: column;
+}
+
+.save-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+  .lesson-card {
+  padding: 14px;
+}
+
+.delete-btn {
+  width: 42px;
+  height: 42px;
+}
+
+.controls {
+  justify-content: center;
+}
+
+.controls button {
+  width: 44px;
+  height: 44px;
+}
+
+.mindmap {
+  overflow-x: auto;
+}
+.scene-image img {
+  height: 220px;
+}
+
+  .studio-tabs {
+  flex-wrap: wrap;
+}
+
+.studio-tabs button {
+  flex: 1;
+}
 }
 
 .studio-tabs {
@@ -836,6 +889,7 @@ input {
 
 .save-btn:hover {
   background: #e4d8f5;
+  color: #362348;
   transform: translateY(-1px);
 }
 .save-message {
@@ -884,7 +938,9 @@ input {
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .lesson-card:hover {
@@ -906,12 +962,7 @@ input {
   color: #8e82a8;
   font-size: 13px;
 }
-.lesson-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
+
 
 .lesson-open {
   flex: 1;
