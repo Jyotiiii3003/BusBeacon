@@ -10,3 +10,8 @@ backend/uploads/
 .vercel/
 .render/
 *.pem
+.env.production
+.env.development
+.env.test
+.env.*
+
