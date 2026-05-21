@@ -25,7 +25,8 @@ export function Login() {
     try {
       await login(email, password);
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      const detail = err.response?.data?.message || err.message || "Login failed";
+      setError(`Login failed: ${detail}`);
     }
   }
 
