@@ -1,48 +1,63 @@
 # BusBeacon
 
-BusBeacon is a full-stack school bus tracking and attendance management system designed to improve student safety, ensure attendance authenticity, and provide real-time communication between schools, parents, drivers, and students.
+BusBeacon is a full-stack school transportation management platform focused on real-time bus tracking, secure attendance verification, and communication between schools, parents, and students.
 
-The platform provides live GPS tracking, QR-based attendance verification, route monitoring, emergency alerts, and dedicated dashboards for administrators, drivers, conductors, parents, and students.
+The system enables schools to monitor buses live, allows parents and students to track routes in real time, and prevents fake attendance through QR-based validation combined with live GPS and geofencing.
 
 ---
 
-## Features
+## Overview
 
-### Authentication and Authorization
-- JWT-based authentication
-- Role-based access control
-- Secure password hashing using bcrypt
+Traditional school transport systems often lack:
+- Real-time visibility of buses
+- Reliable attendance verification
+- Efficient communication during trips
+- Centralized transport management
 
-### Real-Time Bus Tracking
-- Live GPS tracking using Socket.IO
-- Interactive maps powered by OpenStreetMap and Leaflet.js
-- Real-time ETA updates
-- Route visualization with stop markers
+BusBeacon solves these problems by providing a centralized platform for administrators, drivers, conductors, parents, and students.
 
-### Secure Attendance Management
-- QR-code-based attendance verification
-- Attendance can only be marked by conductors or administrators
-- Active trip validation
-- Live GPS verification
-- Geofence-based attendance validation
-- Route and stop verification
+---
 
-### User Dashboards
-- Admin Dashboard
-- Driver Dashboard
-- Conductor Dashboard
-- Parent Dashboard
-- Student Dashboard
+# Core Features
 
-### Notifications and Emergency Support
-- Emergency SOS events
-- Push notifications using Firebase Cloud Messaging
-- Attendance and trip notifications
+## Real-Time Bus Tracking
+- Live GPS tracking for school buses
+- Real-time location updates using Socket.IO
+- Interactive route visualization using OpenStreetMap
+- ETA estimation for parents and students
+- Route stop monitoring
 
-### Progressive Web Application
-- Responsive mobile-first interface
-- Dark mode support
-- Installable PWA support
+## Secure Attendance Verification
+Attendance cannot be marked manually by students.
+
+The system validates attendance through:
+- QR code scanning
+- Active trip verification
+- Live GPS validation
+- Route matching
+- Stop assignment checks
+- Geofence proximity validation
+
+## Role-Based Dashboards
+
+### Admin
+- Manage buses, routes, stops, and users
+- Monitor active trips
+- Track live bus locations
+- View attendance records and reports
+
+### Driver
+- Start and end trips
+- Share continuous live location
+
+### Conductor
+- Scan student QR codes
+- Mark verified attendance
+
+### Parent & Student
+- Track assigned bus in real time
+- View route information and ETA
+- Receive trip notifications
 
 ---
 
@@ -63,10 +78,36 @@ The platform provides live GPS tracking, QR-based attendance verification, route
 - JWT Authentication
 - bcrypt
 
-## Services and APIs
+## Services
 - Firebase Cloud Messaging
-- OpenStreetMap
+- OpenStreetMap API
 - Browser Geolocation API
+
+---
+
+# System Architecture
+
+```text
+BusBeacon
+│
+├── frontend
+│   ├── Authentication
+│   ├── Dashboards
+│   ├── Maps & Tracking
+│   ├── Attendance UI
+│   └── Notifications
+│
+├── backend
+│   ├── REST APIs
+│   ├── Authentication
+│   ├── Attendance Engine
+│   ├── Trip Management
+│   ├── Socket.IO Services
+│   └── Notification Services
+│
+└── database
+    └── MongoDB
+```
 
 ---
 
@@ -96,33 +137,21 @@ BusBeacon/
 │   │   └── pages/
 │   └── public/
 │
-└── .github/
+└── README.md
 ```
-
----
-
-# Getting Started
-
-## Prerequisites
-
-Ensure the following are installed on your system:
-
-- Node.js 20+
-- npm
-- MongoDB Atlas or Local MongoDB
 
 ---
 
 # Installation
 
-Clone the repository:
+## Clone Repository
 
 ```bash
 git clone https://github.com/your-username/busbeacon.git
 cd busbeacon
 ```
 
-Install dependencies:
+## Install Dependencies
 
 ```bash
 npm install
@@ -132,66 +161,60 @@ npm install
 
 # Environment Variables
 
-## Backend Environment Variables (`backend/.env`)
+## Backend (`backend/.env`)
 
 ```env
 PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/busbeacon
-JWT_SECRET=your-secret-key
-CLIENT_URL=http://127.0.0.1:5173
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+CLIENT_URL=http://localhost:5173
 ```
 
-## Frontend Environment Variables (`frontend/.env`)
+## Frontend (`frontend/.env`)
 
 ```env
-VITE_API_URL=http://127.0.0.1:5000
-```
-
----
-
-# Database Seeding
-
-Run the following command to seed sample data:
-
-```bash
-npm run seed
+VITE_API_URL=http://localhost:5000
 ```
 
 ---
 
 # Running the Application
 
-Start the development server:
+## Seed Database
+
+```bash
+npm run seed
+```
+
+## Start Development Server
 
 ```bash
 npm run dev
 ```
 
-Frontend URL:
-
+Frontend:
 ```bash
-http://127.0.0.1:5173
+http://localhost:5173
 ```
 
-Backend Health Check:
-
+Backend:
 ```bash
-http://127.0.0.1:5000/health
+http://localhost:5000
 ```
 
 ---
 
-# Demo Accounts
+# Demo Credentials
 
-| Role       | Email                      |
-|------------|----------------------------|
-| Admin      | admin@busbeacon.test       |
-| Driver     | driver@busbeacon.test      |
-| Conductor  | conductor@busbeacon.test   |
-| Parent     | parent@busbeacon.test      |
-| Student    | student@busbeacon.test     |
+| Role | Email |
+|------|------|
+| Admin | admin@busbeacon.test |
+| Driver | driver@busbeacon.test |
+| Conductor | conductor@busbeacon.test |
+| Parent | parent@busbeacon.test |
+| Student | student@busbeacon.test |
 
-Default Password:
+Password:
 
 ```bash
 Password123!
@@ -199,10 +222,9 @@ Password123!
 
 ---
 
-# API Endpoints
+# API Modules
 
 ## Authentication
-
 ```http
 POST /api/auth/login
 POST /api/auth/register
@@ -210,24 +232,19 @@ GET  /api/auth/me
 ```
 
 ## Trips
-
 ```http
 GET  /api/trips
-GET  /api/trips/active
 POST /api/trips/start
 POST /api/trips/:id/end
 ```
 
 ## Attendance
-
 ```http
 GET  /api/attendance
-GET  /api/attendance/summary
 POST /api/attendance/scan
 ```
 
 ## Notifications
-
 ```http
 GET   /api/notifications
 POST  /api/notifications/emergency
@@ -236,73 +253,55 @@ PATCH /api/notifications/:id/read
 
 ---
 
-# Attendance Verification Logic
+# Attendance Validation Workflow
 
-The system validates attendance using:
-
-- QR code verification
-- Active trip validation
-- GPS-based location verification
-- Geofence proximity checks
-- Route verification
-- Bus-stop assignment validation
-
-This ensures students cannot fake attendance records.
+1. Driver starts trip
+2. Bus begins live GPS sharing
+3. Conductor scans student QR code
+4. Backend validates:
+   - Active trip
+   - GPS availability
+   - Assigned route
+   - Assigned stop
+   - Geofence proximity
+5. Attendance is recorded securely
 
 ---
 
 # Deployment
 
-## Backend Deployment
-
-Recommended platforms:
-- Render
-- Railway
-
-## Frontend Deployment
-
-Recommended platforms:
+## Frontend
 - Vercel
 - Netlify
 
+## Backend
+- Render
+- Railway
+
 ## Database
-
-- MongoDB Atlas Free Tier
-
----
-
-# Screenshots
-
-Add screenshots after deployment:
-
-- Login Page
-- Admin Dashboard
-- Live Bus Tracking
-- QR Attendance Scanner
-- Parent Dashboard
-- Student Dashboard
+- MongoDB Atlas
 
 ---
 
-# Future Enhancements
+# Future Improvements
 
 - AI-based ETA prediction
-- Face recognition attendance
 - Multi-school support
 - Offline attendance synchronization
-- SMS alert integration
-- Driver performance analytics
+- Face recognition attendance
+- SMS and WhatsApp alerts
+- Driver analytics dashboard
 
 ---
 
 # Contributing
 
-Contributions, improvements, and suggestions are welcome.
+Contributions are welcome.
 
 1. Fork the repository
 2. Create a feature branch
-3. Commit your changes
-4. Push the branch
+3. Commit changes
+4. Push to your branch
 5. Open a Pull Request
 
 ---
