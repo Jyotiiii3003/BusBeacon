@@ -1,4 +1,5 @@
-import { Edit2, Plus, Trash2, X } from "lucide-react";
+import QRCode from "qrcode";
+import { Download, Edit2, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api/client";
 import { DataTable } from "../components/DataTable";
@@ -48,6 +49,20 @@ function Field({ label, children }) {
 
 function inputClass() {
   return "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white";
+}
+
+async function downloadQr(row) {
+  const studentName = labelOf(row.user, "student").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+  const dataUrl = await QRCode.toDataURL(row.qrCode, {
+    errorCorrectionLevel: "M",
+    margin: 2,
+    width: 512,
+    color: { dark: "#0f172a", light: "#ffffff" }
+  });
+  const link = document.createElement("a");
+  link.href = dataUrl;
+  link.download = `${studentName || "student"}-busbeacon-qr.png`;
+  link.click();
 }
 
 export function AdminManagementPage() {
@@ -184,6 +199,11 @@ export function AdminManagementPage() {
       label: "Actions",
       render: (row) => (
         <div className="flex gap-2">
+          {active === "students" && row.qrCode && (
+            <button className="rounded-lg border border-emerald-200 p-2 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-300 dark:hover:bg-emerald-950" onClick={() => downloadQr(row)} aria-label="Download student QR">
+              <Download size={15} />
+            </button>
+          )}
           <button className="rounded-lg border border-slate-200 p-2 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800" onClick={() => edit(row)} aria-label="Edit record">
             <Edit2 size={15} />
           </button>
@@ -362,7 +382,15 @@ function columnsFor(active) {
       { key: "parent", label: "Parent", render: (row) => labelOf(row.parent) },
       { key: "assignedBus", label: "Bus", render: (row) => labelOf(row.assignedBus) },
       { key: "assignedStop", label: "Stop", render: (row) => labelOf(row.assignedStop) },
-      { key: "qrCode", label: "QR" }
+      {
+        key: "qrCode",
+        label: "QR",
+        render: (row) => (
+          <div className="max-w-52 truncate font-mono text-xs" title={row.qrCode}>
+            {row.qrCode}
+          </div>
+        )
+      }
     ]
   };
   return base[active];
