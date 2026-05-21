@@ -14,6 +14,7 @@ import { StudentDashboard } from "./pages/StudentDashboard.jsx";
 import { AttendancePage } from "./pages/AttendancePage.jsx";
 import { NotificationsPage } from "./pages/NotificationsPage.jsx";
 import { AdminManagementPage } from "./pages/AdminManagementPage.jsx";
+import { AdminSimulatorPage } from "./pages/AdminSimulatorPage.jsx";
 
 function RoleHome() {
   const { user } = useAuth();
@@ -49,6 +50,7 @@ createRoot(document.getElementById("root")).render(
           >
             <Route index element={<RoleHome />} />
             <Route path="manage" element={<AdminManagementPage />} />
+            <Route path="simulator" element={<AdminSimulatorPage />} />
             <Route path="attendance" element={<AttendancePage />} />
             <Route path="notifications" element={<NotificationsPage />} />
           </Route>
