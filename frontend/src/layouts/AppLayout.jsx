@@ -1,4 +1,4 @@
-import { Bell, Bus, ClipboardList, Home, LogOut, Menu, Moon, Sun } from "lucide-react";
+import { Bell, Bus, ClipboardList, Home, LogOut, Menu, Moon, Settings, Sun } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -11,6 +11,7 @@ export function AppLayout() {
 
   const nav = [
     { to: "/", label: "Dashboard", icon: Home },
+    ...(user?.role === "admin" ? [{ to: "/manage", label: "Manage", icon: Settings }] : []),
     { to: "/attendance", label: "Attendance", icon: ClipboardList },
     { to: "/notifications", label: "Notifications", icon: Bell }
   ];
