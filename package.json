@@ -1,28 +1,19 @@
 {
-  "name": "intellinote",
+  "name": "busbeacon",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "description": "BusBeacon - smart school bus tracking and attendance management system",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
-    "dev": "concurrently \"npm:server\" \"npm:client\"",
-    "server": "node server/index.js",
-    "client": "vite --host 127.0.0.1",
-    "build": "vite build",
-    "preview": "vite preview --host 127.0.0.1"
+    "dev": "concurrently \"npm run dev --workspace backend\" \"npm run dev --workspace frontend\"",
+    "build": "npm run build --workspace frontend",
+    "start": "npm run start --workspace backend",
+    "seed": "npm run seed --workspace backend"
   },
-  "dependencies": {
-    "@vitejs/plugin-react": "^5.0.0",
-    "concurrently": "^9.1.2",
-    "cors": "^2.8.6",
-    "express": "^4.19.2",
-    "jspdf": "^4.2.1",
-    "lucide-react": "^0.468.0",
-    "mongoose": "^9.6.2",
-    "multer": "^2.1.1",
-    "pdf-parse": "^1.1.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "vite": "^6.0.0",
-    "youtube-transcript": "^1.3.1"
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }

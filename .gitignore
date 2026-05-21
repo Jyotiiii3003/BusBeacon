@@ -1,4 +1,12 @@
 node_modules/
 dist/
+frontend/dist/
+coverage/
 *.log
 .env
+.env.local
+.DS_Store
+backend/uploads/
+.vercel/
+.render/
+*.pem
