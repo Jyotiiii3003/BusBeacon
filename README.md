@@ -1,54 +1,126 @@
 # BusBeacon
 
-BusBeacon is a production-ready full-stack school bus tracking and attendance management system. It uses free and open-source tooling: OpenStreetMap, Leaflet.js, Socket.IO, MongoDB Atlas free tier, Firebase Cloud Messaging free tier, React + Vite, Tailwind CSS, Node.js, Express, JWT, and bcrypt.
+BusBeacon is a full-stack school bus tracking and attendance management system designed to improve student safety, ensure attendance authenticity, and provide real-time communication between schools, parents, drivers, and students.
 
-> Project note: the requested overview mentioned SafeRoute, but the application generated here is named BusBeacon throughout.
+The platform provides live GPS tracking, QR-based attendance verification, route monitoring, emergency alerts, and dedicated dashboards for administrators, drivers, conductors, parents, and students.
+
+---
 
 ## Features
 
-- JWT login/logout with role-based authorization.
-- Admin dashboard for buses, routes, stops, users, students, live trips, and reports.
-- Driver dashboard for trip start/end and continuous Browser Geolocation sharing.
-- Conductor dashboard with `html5-qrcode` scanner and secure QR attendance validation.
-- Parent and student dashboards with live bus tracking, route polyline, stop markers, ETA, and history.
-- Attendance validation requires an active trip, active GPS, route membership, assigned bus, assigned stop, and geofence proximity.
-- Haversine geofencing with configurable stop radius.
-- Socket.IO live tracking and emergency event support.
-- Firebase Cloud Messaging service integration with graceful local dry-run mode.
-- Responsive Tailwind UI with dark mode and PWA manifest.
-- Seed data for local testing.
+### Authentication and Authorization
+- JWT-based authentication
+- Role-based access control
+- Secure password hashing using bcrypt
 
-## Architecture
+### Real-Time Bus Tracking
+- Live GPS tracking using Socket.IO
+- Interactive maps powered by OpenStreetMap and Leaflet.js
+- Real-time ETA updates
+- Route visualization with stop markers
 
-```text
-BusBeacon
-|-- backend
-|   |-- src/config        # env and Mongo connection
-|   |-- src/controllers   # REST controllers
-|   |-- src/middleware    # auth and error handling
-|   |-- src/models        # Mongoose schemas
-|   |-- src/routes        # API routes
-|   |-- src/services      # FCM and notifications
-|   |-- src/sockets       # Socket.IO live GPS
-|   |-- src/utils         # Haversine, JWT helpers
-|   `-- src/seed          # sample data
-|-- frontend
-|   |-- src/api           # Axios and Socket.IO clients
-|   |-- src/components    # UI and map components
-|   |-- src/context       # Auth provider
-|   |-- src/layouts       # Dashboard shell
-|   |-- src/pages         # Role dashboards
-|   `-- public            # PWA manifest/icon
-`-- .github/ISSUE_TEMPLATE
+### Secure Attendance Management
+- QR-code-based attendance verification
+- Attendance can only be marked by conductors or administrators
+- Active trip validation
+- Live GPS verification
+- Geofence-based attendance validation
+- Route and stop verification
+
+### User Dashboards
+- Admin Dashboard
+- Driver Dashboard
+- Conductor Dashboard
+- Parent Dashboard
+- Student Dashboard
+
+### Notifications and Emergency Support
+- Emergency SOS events
+- Push notifications using Firebase Cloud Messaging
+- Attendance and trip notifications
+
+### Progressive Web Application
+- Responsive mobile-first interface
+- Dark mode support
+- Installable PWA support
+
+---
+
+# Tech Stack
+
+## Frontend
+- React
+- Vite
+- Tailwind CSS
+- Leaflet.js
+- Socket.IO Client
+
+## Backend
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT Authentication
+- bcrypt
+
+## Services and APIs
+- Firebase Cloud Messaging
+- OpenStreetMap
+- Browser Geolocation API
+
+---
+
+# Project Structure
+
+```bash
+BusBeacon/
+│
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   ├── sockets/
+│   │   ├── utils/
+│   │   └── seed/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── layouts/
+│   │   └── pages/
+│   └── public/
+│
+└── .github/
 ```
 
-## Local Setup
+---
 
-Prerequisites:
+# Getting Started
+
+## Prerequisites
+
+Ensure the following are installed on your system:
 
 - Node.js 20+
 - npm
-- MongoDB local instance or MongoDB Atlas free cluster
+- MongoDB Atlas or Local MongoDB
+
+---
+
+# Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/your-username/busbeacon.git
+cd busbeacon
+```
 
 Install dependencies:
 
@@ -56,194 +128,185 @@ Install dependencies:
 npm install
 ```
 
-Create environment files:
+---
 
-```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-```
+# Environment Variables
 
-Update `backend/.env`:
+## Backend Environment Variables (`backend/.env`)
 
 ```env
 PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/busbeacon
-JWT_SECRET=replace-with-a-long-random-secret
+JWT_SECRET=your-secret-key
 CLIENT_URL=http://127.0.0.1:5173
 ```
 
-Seed the database:
+## Frontend Environment Variables (`frontend/.env`)
+
+```env
+VITE_API_URL=http://127.0.0.1:5000
+```
+
+---
+
+# Database Seeding
+
+Run the following command to seed sample data:
 
 ```bash
 npm run seed
 ```
 
-Run the full stack:
+---
+
+# Running the Application
+
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-Frontend: `http://127.0.0.1:5173`
+Frontend URL:
 
-Backend health check: `http://127.0.0.1:5000/health`
+```bash
+http://127.0.0.1:5173
+```
 
-## Seed Accounts
+Backend Health Check:
 
-All seed accounts use password `Password123!`.
+```bash
+http://127.0.0.1:5000/health
+```
 
-| Role | Email |
-| --- | --- |
-| Admin | `admin@busbeacon.test` |
-| Driver | `driver@busbeacon.test` |
-| Conductor | `conductor@busbeacon.test` |
-| Parent | `parent@busbeacon.test` |
-| Student | `student@busbeacon.test` |
+---
 
-The seed script prints a sample student QR value for scanner testing.
+# Demo Accounts
 
-## Attendance Rules
+| Role       | Email                      |
+|------------|----------------------------|
+| Admin      | admin@busbeacon.test       |
+| Driver     | driver@busbeacon.test      |
+| Conductor  | conductor@busbeacon.test   |
+| Parent     | parent@busbeacon.test      |
+| Student    | student@busbeacon.test     |
 
-Students cannot mark attendance. Attendance can only be created through:
+Default Password:
+
+```bash
+Password123!
+```
+
+---
+
+# API Endpoints
+
+## Authentication
 
 ```http
+POST /api/auth/login
+POST /api/auth/register
+GET  /api/auth/me
+```
+
+## Trips
+
+```http
+GET  /api/trips
+GET  /api/trips/active
+POST /api/trips/start
+POST /api/trips/:id/end
+```
+
+## Attendance
+
+```http
+GET  /api/attendance
+GET  /api/attendance/summary
 POST /api/attendance/scan
 ```
 
-The backend verifies:
+## Notifications
 
-- authenticated user is conductor or admin
-- conductor is assigned to the bus
-- active trip exists
-- bus GPS coordinates exist
-- student QR is valid
-- student belongs to the bus and route
-- bus is within the assigned stop radius
-- attendance is not already marked for that trip
-
-## API Summary
-
-Authentication:
-
-- `POST /api/auth/login`
-- `POST /api/auth/register`
-- `GET /api/auth/me`
-- `POST /api/auth/fcm-token`
-
-Resources:
-
-- `/api/buses`
-- `/api/routes`
-- `/api/stops`
-- `/api/students`
-- `/api/parents`
-- `/api/users`
-
-Trips:
-
-- `GET /api/trips`
-- `GET /api/trips/active`
-- `POST /api/trips/start`
-- `POST /api/trips/:id/end`
-
-Attendance:
-
-- `GET /api/attendance`
-- `GET /api/attendance/summary`
-- `POST /api/attendance/scan`
-
-Notifications:
-
-- `GET /api/notifications`
-- `PATCH /api/notifications/:id/read`
-- `POST /api/notifications/emergency`
-
-Socket.IO events:
-
-- `join:trip`
-- `driver:location`
-- `bus:location`
-- `admin:bus-location`
-- `sos`
-- `emergency`
-
-## Firebase Cloud Messaging
-
-FCM is optional in local development. If Firebase Admin credentials are missing, notification sends are logged as dry runs and database notifications still work.
-
-Set these in `backend/.env` for production:
-
-```env
-FIREBASE_PROJECT_ID=
-FIREBASE_CLIENT_EMAIL=
-FIREBASE_PRIVATE_KEY=
+```http
+GET   /api/notifications
+POST  /api/notifications/emergency
+PATCH /api/notifications/:id/read
 ```
 
-Set these in `frontend/.env` when adding browser push registration:
+---
 
-```env
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_AUTH_DOMAIN=
-VITE_FIREBASE_PROJECT_ID=
-VITE_FIREBASE_MESSAGING_SENDER_ID=
-VITE_FIREBASE_APP_ID=
-```
+# Attendance Verification Logic
 
-## Deployment
+The system validates attendance using:
 
-### MongoDB Atlas Free Tier
+- QR code verification
+- Active trip validation
+- GPS-based location verification
+- Geofence proximity checks
+- Route verification
+- Bus-stop assignment validation
 
-1. Create a free M0 cluster.
-2. Create a database user.
-3. Add your Render outbound IP or temporarily allow `0.0.0.0/0`.
-4. Copy the connection string into `MONGODB_URI`.
+This ensures students cannot fake attendance records.
 
-### Backend on Render Free Tier
+---
 
-1. Create a new Web Service from the GitHub repository.
-2. Root directory: `backend`
-3. Build command: `npm install`
-4. Start command: `npm start`
-5. Add environment variables from `backend/.env.example`.
-6. Set `CLIENT_URL` to the Vercel frontend URL.
+# Deployment
 
-### Frontend on Vercel Free Tier
+## Backend Deployment
 
-1. Import the GitHub repository.
-2. Framework preset: Vite
-3. Root directory: `frontend`
-4. Build command: `npm run build`
-5. Output directory: `dist`
-6. Add `VITE_API_URL` with the Render backend URL.
+Recommended platforms:
+- Render
+- Railway
 
-## Screenshots
+## Frontend Deployment
 
-Add screenshots here after deployment:
+Recommended platforms:
+- Vercel
+- Netlify
 
-- Login screen
-- Admin live map
-- Driver trip controls
-- Conductor QR scanner
-- Parent ETA view
-- Student route view
+## Database
 
-## GitHub Push Instructions
+- MongoDB Atlas Free Tier
 
-```bash
-git init
-git add .
-git commit -m "Initial SafeRoute project setup"
-git branch -M main
-git remote add origin <github_repo_url>
-git push -u origin main
-```
+---
 
-To let Codex push this repo for you, provide:
+# Screenshots
 
-- the GitHub repository URL
-- permission to run the push command
-- working GitHub authentication on this machine, such as GitHub CLI login, credential manager, or a scoped personal access token
+Add screenshots after deployment:
 
-## License
+- Login Page
+- Admin Dashboard
+- Live Bus Tracking
+- QR Attendance Scanner
+- Parent Dashboard
+- Student Dashboard
 
-MIT
+---
+
+# Future Enhancements
+
+- AI-based ETA prediction
+- Face recognition attendance
+- Multi-school support
+- Offline attendance synchronization
+- SMS alert integration
+- Driver performance analytics
+
+---
+
+# Contributing
+
+Contributions, improvements, and suggestions are welcome.
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push the branch
+5. Open a Pull Request
+
+---
+
+# License
+
+This project is licensed under the MIT License.
